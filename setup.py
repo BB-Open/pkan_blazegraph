@@ -3,6 +3,9 @@
 
 from setuptools import find_packages
 from setuptools import setup
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+import atexit
 
 version = '0.1.dev0'
 description = 'PKAN interface to Blazegraph tripelstore'
@@ -18,6 +21,7 @@ install_requires = [
     'requests',
     'SPARQLWrapper',
     'pylama',
+    'python-githooks',
 ],
 
 test_requires = [
@@ -27,6 +31,25 @@ test_requires = [
 
 testfixture_requires = [
 ]
+
+
+def _post_install():
+    from python_githooks import __main__
+    __main__.main()
+
+
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+    def run(self, *args, **kwargs):
+        super(PostDevelopCommand, self).run(*args, **kwargs)
+        _post_install()
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self, *args, **kwargs):
+        super(PostInstallCommand, self).run(*args, **kwargs)
+        _post_install()
+
 
 setup(
     name='pkan.blazegraph',
@@ -45,6 +68,11 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
     ],
+
+    cmdclass={
+        'develop': PostDevelopCommand,
+        'install': PostInstallCommand,
+    },
     keywords='Python Plone',
     author='Dr. Volker Jaenisch',
     author_email='volker.jaenisch@inqbus.de',
