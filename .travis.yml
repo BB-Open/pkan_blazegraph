@@ -1,0 +1,35 @@
+sudo: false
+language: python
+python:
+  - 3.7
+cache:
+  pip: true
+  directories:
+  - eggs
+  - downloads
+env:
+  - PLONE_VERSION=5.2
+matrix:
+  fast_finish: true
+  include:
+    - name: "Python 3.7 on Xenial Linux"
+      python: 3.7           # this works for Linux but is ignored on macOS or Windows
+      dist: xenial          # required for Python >= 3.7
+before_install:
+  - pip uninstall -y six
+install:
+  - pip install -r requirements.txt
+  - wget https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_5/blazegraph.deb
+  - sudo dpkg -i blazegraph.deb
+before_script:
+  - sudo blazegraph start
+script:
+  - bin/code-analysis
+  - bin/test
+after_success:
+  - travis_wait 45 bin/createcoverage
+  - pip install coveralls
+  - coveralls
+notifications:
+  email:
+    - volker.jaenisch@inqbus.de

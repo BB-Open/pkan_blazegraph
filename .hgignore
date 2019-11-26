@@ -1,0 +1,24 @@
+syntax: glob
+*.egg-info
+*.mo
+*.py?
+*~
+.coverage
+.installed.cfg
+.mr.developer.cfg
+Gruntfile.js
+package.json
+package-lock.json
+bin/
+checkouts/
+coverage/
+develop-eggs/
+dist/
+docs/build/
+downloads/
+eggs/
+htmlcov/
+node_modules/
+parts/
+temp_resources/
+var/
