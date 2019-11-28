@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tripel store access"""
 
-from pkan.dcatapde.constants import BLAZEGRAPH_BASE
-from pkan.dcatapde.harvesting.errors import HarvestURINotReachable
-from pkan.dcatapde.harvesting.errors import TripelStoreCreateNamespaceError
+from pkan.blazegraph.constants import BLAZEGRAPH_BASE
+from pkan.blazegraph.errors import HarvestURINotReachable, TripelStoreBulkLoadError, TripelStoreCreateNamespaceError
 from SPARQLWrapper import SPARQLWrapper2
-from pkan.dcatapde.harvesting.errors import TripelStoreBulkLoadError
 
 import requests
 
