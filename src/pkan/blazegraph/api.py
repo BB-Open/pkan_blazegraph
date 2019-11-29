@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tripel store access"""
 
-from pkan.dcatapde.constants import BLAZEGRAPH_BASE
-from pkan.dcatapde.harvesting.errors import HarvestURINotReachable
-from pkan.dcatapde.harvesting.errors import TripelStoreCreateNamespaceError
+from pkan.blazegraph.constants import BLAZEGRAPH_BASE
+from pkan.blazegraph.errors import HarvestURINotReachable, TripelStoreBulkLoadError, TripelStoreCreateNamespaceError
 from SPARQLWrapper import SPARQLWrapper2
-from pkan.dcatapde.harvesting.errors import TripelStoreBulkLoadError
 
 import requests
 
@@ -48,6 +46,8 @@ class Tripelstore(object):
         self.namespace_uris = {}
 
     def sparql_for_namespace(self, namespace):
+        if namespace not in self.namespace_uris:
+            self.generate_namespace_uri(namespace)
         return SPARQL(self.namespace_uris[namespace])
 
     def rest_create_namespace(self, namespace):
@@ -77,12 +77,15 @@ class Tripelstore(object):
             data=params,
             headers=headers,
         )
-        blaze_uri = BLAZEGRAPH_BASE + \
-            '/blazegraph/namespace/{namespace}/sparql'
-        blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
-        self.namespace_uris[namespace] = blaze_uri_with_namespace
+        self.generate_namespace_uri(namespace)
 
         return response
+
+    def generate_namespace_uri(self, namespace):
+        blaze_uri = BLAZEGRAPH_BASE + \
+                    '/blazegraph/namespace/{namespace}/sparql'
+        blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
+        self.namespace_uris[namespace] = blaze_uri_with_namespace
 
     def rest_bulk_load_from_uri(self, namespace, uri, content_type):
         """
