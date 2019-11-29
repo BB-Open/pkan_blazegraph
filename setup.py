@@ -5,12 +5,12 @@ from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
-import atexit
+import os, sys
 
 version = '0.1.dev0'
 description = 'PKAN interface to Blazegraph tripelstore'
 long_description = '\n\n'.join([
-    open('README.md').read(),
+    open('README.rst').read(),
     open('CONTRIBUTORS.rst').read(),
     open('CHANGES.rst').read(),
 ])
@@ -32,10 +32,26 @@ test_requires = [
 testfixture_requires = [
 ]
 
+TEMPLATE = """
+cd {0}
+{1} -m {2} ./src"""
+
+LINTER = 'pylama'
 
 def _post_install():
-    from python_githooks import __main__
-    __main__.main()
+    BASE_DIR = os.environ["PWD"]
+    GITHOOKS_FILE = os.path.join(BASE_DIR, '.git/hooks/pre_commit')
+    python = sys.executable
+
+    res = TEMPLATE.format(
+        BASE_DIR,
+        python,
+        LINTER
+    )
+    f_out = open(GITHOOKS_FILE, 'w')
+
+    f_out.write(res)
+    f_out.close()
 
 
 class PostDevelopCommand(develop):

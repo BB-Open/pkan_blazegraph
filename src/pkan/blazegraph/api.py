@@ -9,6 +9,7 @@ from pkan.dcatapde.harvesting.errors import TripelStoreBulkLoadError
 
 import requests
 
+
 class SPARQL(object):
     """
     API to the SPARQL Endpoint of a namespace
