@@ -46,6 +46,8 @@ class Tripelstore(object):
         self.namespace_uris = {}
 
     def sparql_for_namespace(self, namespace):
+        if namespace not in self.namespace_uris:
+            self.generate_namespace_uri(namespace)
         return SPARQL(self.namespace_uris[namespace])
 
     def rest_create_namespace(self, namespace):
@@ -75,12 +77,15 @@ class Tripelstore(object):
             data=params,
             headers=headers,
         )
-        blaze_uri = BLAZEGRAPH_BASE + \
-            '/blazegraph/namespace/{namespace}/sparql'
-        blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
-        self.namespace_uris[namespace] = blaze_uri_with_namespace
+        self.generate_namespace_uri(namespace)
 
         return response
+
+    def generate_namespace_uri(self, namespace):
+        blaze_uri = BLAZEGRAPH_BASE + \
+                    '/blazegraph/namespace/{namespace}/sparql'
+        blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
+        self.namespace_uris[namespace] = blaze_uri_with_namespace
 
     def rest_bulk_load_from_uri(self, namespace, uri, content_type):
         """
