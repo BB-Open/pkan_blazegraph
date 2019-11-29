@@ -35,6 +35,11 @@ class SPARQL(object):
         self.sparql.method = 'POST'
         self.sparql.query()
 
+    def query(self, queryString):
+        self.sparql.setQuery(queryString)
+        results = self.sparql.query()
+        return results
+
 
 class Tripelstore(object):
     """
