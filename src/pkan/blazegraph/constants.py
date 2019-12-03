@@ -1,1 +1,1 @@
-BLAZEGRAPH_BASE = 'http://localhost:9999'
+BLAZEGRAPH_BASE = 'http://10.1.0.248:9999'
