@@ -91,6 +91,7 @@ class Tripelstore(object):
                     '/blazegraph/namespace/{namespace}/sparql'
         blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
         self.namespace_uris[namespace] = blaze_uri_with_namespace
+        return blaze_uri_with_namespace
 
     def rest_bulk_load_from_uri(self, namespace, uri, content_type):
         """
@@ -108,10 +109,7 @@ class Tripelstore(object):
         tripel_data = response.content
 
         # push it into the tripelstore
-        blaze_uri = \
-            BLAZEGRAPH_BASE + \
-            '/blazegraph/namespace/{namespace}/sparql'
-        blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
+        blaze_uri_with_namespace = self.generate_namespace_uri(namespace)
         headers = {'Content-Type': content_type}
         response = requests.post(
             blaze_uri_with_namespace,
@@ -124,7 +122,7 @@ class Tripelstore(object):
         self.create_namespace(namespace)
         response = self.rest_bulk_load_from_uri(namespace, uri, content_type)
         if response.status_code == 200:
-            return self.sparql_for_namespace(namespace)
+            return self.sparql_for_namespace(namespace), response
         else:
             raise TripelStoreBulkLoadError(response.content)
 
@@ -136,6 +134,29 @@ class Tripelstore(object):
             msg = str(response.status_code) + ': ' + response.content
             raise TripelStoreCreateNamespaceError(msg)
 
+    def move_data_between_namespaces(self, target_namespace, source_namespace):
+        source = self.generate_namespace_uri(source_namespace)
+        target = self.generate_namespace_uri(target_namespace)
+        mime_type = 'application/rdf+xml'
+        headers = {
+            'Accept': mime_type,
+        }
+
+        data = {
+            'query': 'CONSTRUCT  WHERE { ?s ?p ?o }'
+        }
+
+        response = requests.post(source, headers=headers, data=data)
+        tripel_data = response.content
+
+        headers = {'Content-Type': mime_type}
+        response = requests.post(
+            target,
+            data=tripel_data,
+            headers=headers,
+        )
+
+        return response
 
 # ToDo make to utility
 tripel_store = Tripelstore()
