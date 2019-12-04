@@ -135,6 +135,8 @@ class Tripelstore(object):
             raise TripelStoreCreateNamespaceError(msg)
 
     def move_data_between_namespaces(self, target_namespace, source_namespace):
+        self.create_namespace(source_namespace)
+        self.create_namespace(target_namespace)
         source = self.generate_namespace_uri(source_namespace)
         target = self.generate_namespace_uri(target_namespace)
         mime_type = 'application/rdf+xml'
