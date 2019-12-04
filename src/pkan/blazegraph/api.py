@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Tripel store access"""
 
-from pkan.blazegraph.constants import BLAZEGRAPH_BASE
-from pkan.blazegraph.errors import HarvestURINotReachable, TripelStoreBulkLoadError, TripelStoreCreateNamespaceError
+import requests
 from SPARQLWrapper import SPARQLWrapper2
 
-import requests
+from pkan.blazegraph.constants import BLAZEGRAPH_BASE
+from pkan.blazegraph.errors import HarvestURINotReachable, TripelStoreBulkLoadError, TripelStoreCreateNamespaceError
 
 
 class SPARQL(object):
@@ -159,6 +159,22 @@ class Tripelstore(object):
         )
 
         return response
+
+    def get_turtle_from_query(self, namespace, query):
+        self.create_namespace(namespace)
+        source = self.generate_namespace_uri(namespace)
+        mime_type = 'text/turtle'
+
+        headers = {
+            'Accept': mime_type
+        }
+
+        data = {'query': query}
+        response = requests.post(source, headers=headers, data=data)
+        tripel_data = response.content
+
+        return tripel_data
+
 
 # ToDo make to utility
 tripel_store = Tripelstore()
