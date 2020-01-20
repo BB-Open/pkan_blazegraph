@@ -46,9 +46,13 @@ class Tripelstore(object):
     API to the tripelstore
     """
 
-    def __init__(self):
+    def __init__(self, blazegraph_base=None):
 
         self.namespace_uris = {}
+        if blazegraph_base:
+            self.blazegraph_base = blazegraph_base
+        else:
+            self.blazegraph_base = BLAZEGRAPH_BASE
 
     def sparql_for_namespace(self, namespace):
         if namespace not in self.namespace_uris:
@@ -78,7 +82,7 @@ class Tripelstore(object):
         """.format(namespace=namespace)
         headers = {'content-type': 'text/plain'}
         response = requests.post(
-            BLAZEGRAPH_BASE + '/blazegraph/namespace',
+            self.blazegraph_base + '/blazegraph/namespace',
             data=params,
             headers=headers,
         )
@@ -87,7 +91,7 @@ class Tripelstore(object):
         return response
 
     def generate_namespace_uri(self, namespace):
-        blaze_uri = BLAZEGRAPH_BASE + \
+        blaze_uri = self.blazegraph_base + \
                     '/blazegraph/namespace/{namespace}/sparql'
         blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
         self.namespace_uris[namespace] = blaze_uri_with_namespace
