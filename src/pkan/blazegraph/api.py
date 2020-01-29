@@ -165,9 +165,14 @@ class Tripelstore(object):
         return response
 
     def get_turtle_from_query(self, namespace, query):
+
+        mime_type = 'text/turtle'
+        tripel_data = self.get_triple_data_from_query(namespace, query, mime_type)
+        return tripel_data
+
+    def get_triple_data_from_query(self, namespace, query, mime_type):
         self.create_namespace(namespace)
         source = self.generate_namespace_uri(namespace)
-        mime_type = 'text/turtle'
 
         headers = {
             'Accept': mime_type
