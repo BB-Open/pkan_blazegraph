@@ -184,6 +184,21 @@ class Tripelstore(object):
 
         return tripel_data
 
+    def empty_namespace(self, namespace):
+        self.create_namespace(namespace)
+        source = self.generate_namespace_uri(namespace)
+        mime_type = 'application/rdf+xml'
+        query = '''DELETE {?s ?p ?o . } Where {?s ?p ?o}'''
+
+        headers = {
+            'Accept': mime_type
+        }
+
+        data = {'query': query}
+        response = requests.delete(source, headers=headers, data=data)
+        tripel_data = response.content
+
+        return tripel_data
 
 # ToDo make to utility
 tripel_store = Tripelstore()
