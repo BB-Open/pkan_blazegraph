@@ -97,7 +97,7 @@ class Tripelstore(object):
         self.namespace_uris[namespace] = blaze_uri_with_namespace
         return blaze_uri_with_namespace
 
-    def rest_bulk_load_from_uri(self, namespace, uri, content_type):
+    def rest_bulk_load_from_uri(self, namespace, uri, content_type, clear_namespace=False):
         """
         Load the tripel_data from the harvest uri
         and push it into the tripelstore
@@ -112,6 +112,9 @@ class Tripelstore(object):
             raise HarvestURINotReachable(response.content)
         tripel_data = response.content
 
+        if clear_namespace:
+            self.empty_namespace(namespace)
+
         # push it into the tripelstore
         blaze_uri_with_namespace = self.generate_namespace_uri(namespace)
         headers = {'Content-Type': content_type}
@@ -122,9 +125,9 @@ class Tripelstore(object):
         )
         return response
 
-    def graph_from_uri(self, namespace, uri, content_type):
+    def graph_from_uri(self, namespace, uri, content_type, clear_namespace=False):
         self.create_namespace(namespace)
-        response = self.rest_bulk_load_from_uri(namespace, uri, content_type)
+        response = self.rest_bulk_load_from_uri(namespace, uri, content_type, clear_namespace=clear_namespace)
         if response.status_code == 200:
             return self.sparql_for_namespace(namespace), response
         else:
