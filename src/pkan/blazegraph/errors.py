@@ -1,3 +1,5 @@
+"""Error Api"""
+
 class HarvestURINotReachable(Exception):
     """HarvestURINotReachable"""
 
