@@ -5,7 +5,8 @@ import requests
 from SPARQLWrapper import SPARQLWrapper2
 
 from pkan.blazegraph.constants import BLAZEGRAPH_BASE
-from pkan.blazegraph.errors import HarvestURINotReachable, TripelStoreBulkLoadError, TripelStoreCreateNamespaceError
+from pkan.blazegraph.errors import HarvestURINotReachable, \
+    TripelStoreBulkLoadError, TripelStoreCreateNamespaceError
 
 
 class SPARQL(object):
@@ -16,7 +17,11 @@ class SPARQL(object):
     def __init__(self, uri):
         self.sparql = SPARQLWrapper2(uri)
 
-    def exists(self, URI):
+    def exists(self, _URI):
+        """
+        :param _URI:
+        :return:
+        """
         self.sparql.setQuery("""
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             SELECT ?s
@@ -27,6 +32,10 @@ class SPARQL(object):
             return True
 
     def insert(self, tripel):
+        """
+        :param tripel:
+        :return:
+        """
         queryString = """INSERT DATA
            {{ GRAPH <http://example.com/> {{ {s} {p} {o} }} }}"""
 
@@ -36,6 +45,10 @@ class SPARQL(object):
         self.sparql.query()
 
     def query(self, queryString):
+        """
+        :param queryString:
+        :return:
+        """
         self.sparql.setQuery(queryString)
         results = self.sparql.query()
         return results
@@ -55,6 +68,10 @@ class Tripelstore(object):
             self.blazegraph_base = BLAZEGRAPH_BASE
 
     def sparql_for_namespace(self, namespace):
+        """
+        :param namespace:
+        :return:
+        """
         if namespace not in self.namespace_uris:
             self.generate_namespace_uri(namespace)
         return SPARQL(self.namespace_uris[namespace])
@@ -91,6 +108,10 @@ class Tripelstore(object):
         return response
 
     def generate_namespace_uri(self, namespace):
+        """
+        :param namespace:
+        :return:
+        """
         blaze_uri = self.blazegraph_base + \
                     '/blazegraph/namespace/{namespace}/sparql'
         blaze_uri_with_namespace = blaze_uri.format(namespace=namespace)
@@ -126,14 +147,26 @@ class Tripelstore(object):
         return response
 
     def graph_from_uri(self, namespace, uri, content_type, clear_namespace=False):
+        """
+        :param namespace:
+        :param uri:
+        :param content_type:
+        :param clear_namespace:
+        :return:
+        """
         self.create_namespace(namespace)
-        response = self.rest_bulk_load_from_uri(namespace, uri, content_type, clear_namespace=clear_namespace)
+        response = self.rest_bulk_load_from_uri(
+            namespace, uri, content_type, clear_namespace=clear_namespace)
         if response.status_code == 200:
             return self.sparql_for_namespace(namespace), response
         else:
             raise TripelStoreBulkLoadError(response.content)
 
     def create_namespace(self, namespace):
+        """
+        :param namespace:
+        :return:
+        """
         response = self.rest_create_namespace(namespace)
         if response.status_code in [200, 201, 409]:
             return self.sparql_for_namespace(namespace)
@@ -142,6 +175,11 @@ class Tripelstore(object):
             raise TripelStoreCreateNamespaceError(msg)
 
     def move_data_between_namespaces(self, target_namespace, source_namespace):
+        """
+        :param target_namespace:
+        :param source_namespace:
+        :return:
+        """
         self.create_namespace(source_namespace)
         self.create_namespace(target_namespace)
         source = self.generate_namespace_uri(source_namespace)
@@ -168,12 +206,22 @@ class Tripelstore(object):
         return response
 
     def get_turtle_from_query(self, namespace, query):
-
+        """
+        :param namespace:
+        :param query:
+        :return:
+        """
         mime_type = 'text/turtle'
         tripel_data = self.get_triple_data_from_query(namespace, query, mime_type)
         return tripel_data
 
     def get_triple_data_from_query(self, namespace, query, mime_type):
+        """
+        :param namespace:
+        :param query:
+        :param mime_type:
+        :return:
+        """
         self.create_namespace(namespace)
         source = self.generate_namespace_uri(namespace)
 
@@ -188,6 +236,10 @@ class Tripelstore(object):
         return tripel_data
 
     def empty_namespace(self, namespace):
+        """
+        :param namespace:
+        :return:
+        """
         self.create_namespace(namespace)
         source = self.generate_namespace_uri(namespace)
         mime_type = 'application/rdf+xml'
