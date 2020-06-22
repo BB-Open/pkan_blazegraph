@@ -51,11 +51,12 @@ def _post_install():
         python,
         LINTER
     )
-    f_out = open(GITHOOKS_FILE, 'w')
-
-    f_out.write(res)
-    f_out.close()
-
+    try:
+        with open(GITHOOKS_FILE, 'w') as f_out:
+            f_out.write(res)
+    except:
+        # if this fails we were called by pipenv install from the main path.
+        pass
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
